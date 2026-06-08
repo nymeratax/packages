@@ -13,7 +13,7 @@ local bwriteu8, breadu8   = buffer.writeu8, buffer.readu8
 local bwritei16, breadi16 = buffer.writei16, buffer.readi16
 local bwriteu16, breadu16 = buffer.writeu16, buffer.readu16
 local bwritei32, breadi32 = buffer.writei32, buffer.readi32
-local bwriteu32, breadu32 = buffer.readu32, buffer.readu32
+local bwriteu32, breadu32 = buffer.writeu32, buffer.readu32
 local bwritef32, breadf32 = buffer.writef32, buffer.readf32
 local bwritef64, breadf64 = buffer.writef64, buffer.readf64
 local bwritestr, breadstr = buffer.writestring, buffer.readstring
@@ -61,7 +61,7 @@ end
 
 function BufferStream:_assertRead(neededBytes: number)
 	if self._cursor + neededBytes > self._size then
-		error(string.format("[BufferStream] Attempt to read out of bounds! Cursor: %d, Needed: %d, Size: %d", self._cursor, neededBytes, self._size), 2)
+		error(string.format("[BufferStream] Attempt to read out of bounds, Cursor: %d, Needed: %d, Size: %d", self._cursor, neededBytes, self._size), 2)
 	end
 end
 
@@ -91,59 +91,16 @@ function BufferStream:GetLength(): number
 	return self._size
 end
 
-function BufferStream:WriteI8(value: number)
-	self:_ensureCapacity(1)
-	bwritei8(self._buffer, self._cursor, value)
-	self._cursor += 1
-end
+function BufferStream:WriteI8(value: number)   self:_ensureCapacity(1) bwritei8(self._buffer, self._cursor, value) self._cursor += 1 end
+function BufferStream:WriteU8(value: number)   self:_ensureCapacity(1) bwriteu8(self._buffer, self._cursor, value) self._cursor += 1 end
+function BufferStream:WriteBool(value: boolean) self:_ensureCapacity(1) bwriteu8(self._buffer, self._cursor, value and 1 or 0) self._cursor += 1 end
 
-function BufferStream:WriteU8(value: number)
-	self:_ensureCapacity(1)
-	bwriteu8(self._buffer, self._cursor, value)
-	self._cursor += 1
-end
-
-function BufferStream:WriteBool(value: boolean)
-	self:_ensureCapacity(1)
-	bwriteu8(self._buffer, self._cursor, value and 1 or 0)
-	self._cursor += 1
-end
-
-function BufferStream:WriteI16(value: number)
-	self:_ensureCapacity(2)
-	bwritei16(self._buffer, self._cursor, value)
-	self._cursor += 2
-end
-
-function BufferStream:WriteU16(value: number)
-	self:_ensureCapacity(2)
-	bwriteu16(self._buffer, self._cursor, value)
-	self._cursor += 2
-end
-
-function BufferStream:WriteI32(value: number)
-	self:_ensureCapacity(4)
-	bwritei32(self._buffer, self._cursor, value)
-	self._cursor += 4
-end
-
-function BufferStream:WriteU32(value: number)
-	self:_ensureCapacity(4)
-	bwriteu32(self._buffer, self._cursor, value)
-	self._cursor += 4
-end
-
-function BufferStream:WriteF32(value: number)
-	self:_ensureCapacity(4)
-	bwritef32(self._buffer, self._cursor, value)
-	self._cursor += 4
-end
-
-function BufferStream:WriteF64(value: number)
-	self:_ensureCapacity(8)
-	bwritef64(self._buffer, self._cursor, value)
-	self._cursor += 8
-end
+function BufferStream:WriteI16(value: number) self:_ensureCapacity(2) bwritei16(self._buffer, self._cursor, value) self._cursor += 2 end
+function BufferStream:WriteU16(value: number) self:_ensureCapacity(2) bwriteu16(self._buffer, self._cursor, value) self._cursor += 2 end
+function BufferStream:WriteI32(value: number) self:_ensureCapacity(4) bwritei32(self._buffer, self._cursor, value) self._cursor += 4 end
+function BufferStream:WriteU32(value: number) self:_ensureCapacity(4) bwriteu32(self._buffer, self._cursor, value) self._cursor += 4 end
+function BufferStream:WriteF32(value: number) self:_ensureCapacity(4) bwritef32(self._buffer, self._cursor, value) self._cursor += 4 end
+function BufferStream:WriteF64(value: number) self:_ensureCapacity(8) bwritef64(self._buffer, self._cursor, value) self._cursor += 8 end
 
 function BufferStream:WriteString(value: string)
 	local len = #value
@@ -153,68 +110,16 @@ function BufferStream:WriteString(value: string)
 	self._cursor += 2 + len
 end
 
-function BufferStream:ReadI8(): number
-	self:_assertRead(1)
-	local v = breadi8(self._buffer, self._cursor)
-	self._cursor += 1
-	return v
-end
+function BufferStream:ReadI8(): number   self:_assertRead(1) local v = breadi8(self._buffer, self._cursor)   self._cursor += 1 return v end
+function BufferStream:ReadU8(): number   self:_assertRead(1) local v = breadu8(self._buffer, self._cursor)   self._cursor += 1 return v end
+function BufferStream:ReadBool(): boolean self:_assertRead(1) local v = breadu8(self._buffer, self._cursor)   self._cursor += 1 return v == 1 end
 
-function BufferStream:ReadU8(): number
-	self:_assertRead(1)
-	local v = breadu8(self._buffer, self._cursor)
-	self._cursor += 1
-	return v
-end
-
-function BufferStream:ReadBool(): boolean
-	self:_assertRead(1)
-	local v = breadu8(self._buffer, self._cursor)
-	self._cursor += 1
-	return v == 1
-end
-
-function BufferStream:ReadI16(): number
-	self:_assertRead(2)
-	local v = breadi16(self._buffer, self._cursor)
-	self._cursor += 2
-	return v
-end
-
-function BufferStream:ReadU16(): number
-	self:_assertRead(2)
-	local v = breadu16(self._buffer, self._cursor)
-	self._cursor += 2
-	return v
-end
-
-function BufferStream:ReadI32(): number
-	self:_assertRead(4)
-	local v = breadi32(self._buffer, self._cursor)
-	self._cursor += 4
-	return v
-end
-
-function BufferStream:ReadU32(): number
-	self:_assertRead(4)
-	local v = breadu32(self._buffer, self._cursor)
-	self._cursor += 4
-	return v
-end
-
-function BufferStream:ReadF32(): number
-	self:_assertRead(4)
-	local v = breadf32(self._buffer, self._cursor)
-	self._cursor += 4
-	return v
-end
-
-function BufferStream:ReadF64(): number
-	self:_assertRead(8)
-	local v = breadf64(self._buffer, self._cursor)
-	self._cursor += 8
-	return v
-end
+function BufferStream:ReadI16(): number self:_assertRead(2) local v = breadi16(self._buffer, self._cursor) self._cursor += 2 return v end
+function BufferStream:ReadU16(): number self:_assertRead(2) local v = breadu16(self._buffer, self._cursor) self._cursor += 2 return v end
+function BufferStream:ReadI32(): number self:_assertRead(4) local v = breadi32(self._buffer, self._cursor) self._cursor += 4 return v end
+function BufferStream:ReadU32(): number self:_assertRead(4) local v = breadu32(self._buffer, self._cursor) self._cursor += 4 return v end
+function BufferStream:ReadF32(): number self:_assertRead(4) local v = breadf32(self._buffer, self._cursor) self._cursor += 4 return v end
+function BufferStream:ReadF64(): number self:_assertRead(8) local v = breadf64(self._buffer, self._cursor) self._cursor += 8 return v end
 
 function BufferStream:ReadString(): string
 	self:_assertRead(2)
@@ -283,11 +188,11 @@ end
 function BufferStream:WriteCFrame(value: CFrame)
 	self:_ensureCapacity(24)
 	local b, c = self._buffer, self._cursor
-	local x, y, z, qx, qy, qz = value:GetComponents()
-	
-	bwritef32(b, c, x)
-	bwritef32(b, c + 4, y)
-	bwritef32(b, c + 8, z)
+	local pos = value.Position
+	local qx, qy, qz, qw = value:ToQuaternion()
+	bwritef32(b, c, pos.X)
+	bwritef32(b, c + 4, pos.Y)
+	bwritef32(b, c + 8, pos.Z)
 	bwritef32(b, c + 12, qx)
 	bwritef32(b, c + 16, qy)
 	bwritef32(b, c + 20, qz)
@@ -308,7 +213,7 @@ function BufferStream:ReadCFrame(): CFrame
 	local trace = 1 - (qx*qx + qy*qy + qz*qz)
 	local qw = trace > 0 and math.sqrt(trace) or 0
 	
-	return CFrame.new(x, y, z, qx, qy, qz, qw)
+	return CFrame.fromQuaternion(Vector3.new(x, y, z), qx, qy, qz, qw)
 end
 
 return BufferStream
