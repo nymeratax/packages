@@ -1,5 +1,13 @@
 --!strict
 
+local clonefunction = clonefunction or function<T>(fn: T): T
+    return fn
+end
+
+local cloneref = cloneref or function<T>(ref: T): T
+    return ref
+end
+
 local get_service = clonefunction(game.GetService)
 local service_cache: { [string]: Instance } = {}
 
